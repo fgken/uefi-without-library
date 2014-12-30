@@ -1,0 +1,18 @@
+struct _EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL;
+
+typedef void* EFI_TEXT_RESET;
+
+typedef
+EFI_STATUS
+(EFIAPI *EFI_TEXT_STRING) (
+	IN struct _EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL	*This,
+	IN CHAR16									*String
+	);
+
+	
+typedef struct _EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL {
+	EFI_TEXT_RESET		Reset;
+	EFI_TEXT_STRING		OutputString;
+	/* ... */
+} EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL;
+

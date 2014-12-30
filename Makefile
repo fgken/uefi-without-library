@@ -16,7 +16,7 @@ setup:
 	mkdir -p image/EFI/BOOT
 	ln -sf ../../../uefi-app.efi image/EFI/BOOT/BOOTX64.EFI
 
-run:
+run: uefi-app.efi
 	qemu-system-x86_64 -nographic -bios OVMF.fd -hda fat:image
 
 clean:
