@@ -1,5 +1,6 @@
 #define IN
 #define OUT
+#define OPTIONAL
 #define EFIAPI
 
 #define EFI_SUCCESS		0
@@ -53,4 +54,7 @@ typedef struct {
 
 	/* ... */
 } EFI_SYSTEM_TABLE;
+
+
+extern EFI_GUID gEfiSimpleFileSystemProtocolGuid;
 

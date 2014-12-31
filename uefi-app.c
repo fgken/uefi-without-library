@@ -3,43 +3,25 @@
 #define puts(str)	gST->ConOut->OutputString(gST->ConOut, (str))
 #define sleep()		{int i,j; for(i=0; i<10000; i++)for(j=0; j<10000; j++);}
 
-EFI_SYSTEM_TABLE *gST = NULL;
-EFI_BOOT_SERVICES *gBS = NULL;
+//#include "debug.h"
 
-void gethexchar(UINT8 val, CHAR16 *str)
-{
-	if(0 <= val && val <= 9){
-		*str = L'0' + val;
-	}
-	else{
-		*str = L'A' + val - 10;
-	}
+#define DEFAULT_SERIAL_PORT 0x3f8
+
+static inline unsigned char inb(int port) {
+    unsigned char value;
+    asm volatile("inb %w1, %b0" : "=a"(value) : "Nd"(port));
+    return value;
 }
 
-void val2hexstr(UINT8 val, CHAR16 *str)
-{
-	gethexchar((val >> 4) & 0x0f, &str[0]);
-	gethexchar((val & 0x0f), &str[1]);
+static inline void outb(unsigned char value, int port) {
+    asm volatile("outb %b0, %w1" : : "a"(value), "Nd"(port));
 }
 
-void memdump(UINT8 *p, UINTN len)
-{
-	CHAR16 Str[16];
-	UINTN i,j;
+EFI_SYSTEM_TABLE	*gST = NULL;
+EFI_BOOT_SERVICES	*gBS = NULL;
 
-	Str[2] = L'\0';
-
-	i = 0;
-
-	while(i<len){
-		for(j=0; j<8 && i<len; j++,i++){
-			val2hexstr(p[i], Str);
-			puts(Str);
-			puts(L" ");
-		}
-		puts(L"\n");
-	}
-}
+void *entry = NULL;
+void *boot_param = NULL;
 
 EFI_STATUS
 EFIAPI
@@ -48,30 +30,61 @@ EfiMain (
     IN EFI_SYSTEM_TABLE  *SystemTable
     )
 {
-	CHAR16 Str[24] = L"Hello World!\n";
-	EFI_INPUT_KEY Key;
-	UINTN Index;
-
+	EFI_STATUS Status;
+	UINTN MapKey = 0;
+	int i;
+	UINTN MemoryMapSize = 0;
+	EFI_MEMORY_DESCRIPTOR *MemoryMap = NULL;
+	UINTN DescriptorSize;
+	UINT32 DescriptorVersion;
+	
 	gST = SystemTable;
 	gBS = SystemTable->BootServices;
 
     puts(L"EFI App Start!\n");
-	
 
-	while(1){
-		SystemTable->BootServices->WaitForEvent(1, &SystemTable->ConIn->WaitForKey, &Index);
-		SystemTable->ConIn->ReadKeyStroke(SystemTable->ConIn, &Key);
-
-		Str[0] = Key.UnicodeChar;
-		Str[1] = L'\n';
-		Str[2] = L'\0';
-
-		puts(Str);
+	{
+		int port = DEFAULT_SERIAL_PORT;
+		outb('A', port);
+		outb('B', port);
+		outb('C', port);
+		outb('\n', port);
 	}
 
-	puts(L"Finished\n");
 
+//	{
+//		UINTN NumberOfFileSystemHandles;
+//		EFI_HANDLE *FileSystemHandles;
+//
+//		Status = gBS->LocateHandleBuffer(
+//				ByProtocol,
+//				&gEfiSimpleFileSystemProtocolGuid,
+//				NULL,
+//				&NumberOfFileSystemHandle,
+//				&FileSystemHandles
+//				);
+//		if(Status != EFI_SUCCESS){
+//			puts("Error: LocateHandleBuffer(SimpleFileSys) Failed\n");
+//		}
+//
+//
+//	}
+//
+//	gBS->GetMemoryMap(&MemoryMapSize, MemoryMap, &MapKey,
+//			&DescriptorSize, &DescriptorVersion);
+//
+//	if(MapKey != 0){
+//		puts(L"MapKey != 0!!\n");
+//		Status = gBS->ExitBootServices(ImageHandle, MapKey);
+//		if(Status != EFI_SUCCESS){
+//			puts("Error: ExitBootServices Failed!\n");
+//		}
+//	}
+//
+//	asm volatile ("mov r28=%1; br.sptk.few %0" :: "b"(entry), "r"(boot_param));
+//
     while(1);
+
     return EFI_SUCCESS;
 }
 
