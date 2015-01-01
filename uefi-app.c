@@ -31,6 +31,7 @@ EfiMain (
     )
 {
 	EFI_STATUS Status;
+	CHAR16 FilePath[] = L"\\\\print.efi"
 	UINTN MapKey = 0;
 	int i;
 	UINTN MemoryMapSize = 0;
@@ -43,46 +44,50 @@ EfiMain (
 
     puts(L"EFI App Start!\n");
 
+	return EFI_SUCCESS;
+
+	{
+		UINTN NumberOfFileSystemHandles;
+		EFI_HANDLE *FileSystemHandles;
+		EFI_DEVICE_PATH_PROTOCOL *FileDevicePath = NULL;
+
+		Status = gBS->LocateHandleBuffer(
+				ByProtocol,
+				&gEfiSimpleFileSystemProtocolGuid,
+				NULL,
+				&NumberOfFileSystemHandle,
+				&FileSystemHandles
+				);
+		if(Status != EFI_SUCCESS){
+			puts("Error: LocateHandleBuffer(SimpleFileSys) Failed\n");
+		}
+
+		// Get device path of file from file path
+		//FileDevicePath = 
+
+		//Status = gBS->LocateDevicePath, &
+
+
+	}
+
+	gBS->GetMemoryMap(&MemoryMapSize, MemoryMap, &MapKey,
+			&DescriptorSize, &DescriptorVersion);
+
+	if(MapKey != 0){
+		puts(L"MapKey != 0!!\n");
+		Status = gBS->ExitBootServices(ImageHandle, MapKey);
+		if(Status != EFI_SUCCESS){
+			puts("Error: ExitBootServices Failed!\n");
+		}
+	}
+
+	asm volatile ("mov r28=%1; br.sptk.few %0" :: "b"(entry), "r"(boot_param));
+
 	{
 		int port = DEFAULT_SERIAL_PORT;
 		outb('A', port);
-		outb('B', port);
-		outb('C', port);
-		outb('\n', port);
 	}
 
-
-//	{
-//		UINTN NumberOfFileSystemHandles;
-//		EFI_HANDLE *FileSystemHandles;
-//
-//		Status = gBS->LocateHandleBuffer(
-//				ByProtocol,
-//				&gEfiSimpleFileSystemProtocolGuid,
-//				NULL,
-//				&NumberOfFileSystemHandle,
-//				&FileSystemHandles
-//				);
-//		if(Status != EFI_SUCCESS){
-//			puts("Error: LocateHandleBuffer(SimpleFileSys) Failed\n");
-//		}
-//
-//
-//	}
-//
-//	gBS->GetMemoryMap(&MemoryMapSize, MemoryMap, &MapKey,
-//			&DescriptorSize, &DescriptorVersion);
-//
-//	if(MapKey != 0){
-//		puts(L"MapKey != 0!!\n");
-//		Status = gBS->ExitBootServices(ImageHandle, MapKey);
-//		if(Status != EFI_SUCCESS){
-//			puts("Error: ExitBootServices Failed!\n");
-//		}
-//	}
-//
-//	asm volatile ("mov r28=%1; br.sptk.few %0" :: "b"(entry), "r"(boot_param));
-//
     while(1);
 
     return EFI_SUCCESS;
