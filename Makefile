@@ -17,7 +17,7 @@ setup:
 	ln -sf ../../../uefi-app.efi image/EFI/BOOT/BOOTX64.EFI
 
 run: uefi-app.efi
-	qemu-system-x86_64 -nographic -bios OVMF.fd -hda fat:image
+	qemu-system-x86_64 -nographic -bios OVMF.fd -hda fat:image -net none
 
 clean:
 	rm *.efi
